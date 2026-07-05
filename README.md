@@ -1,4 +1,40 @@
+# Parallel Memory
 
+複数の神経衰弱ボードを順番に切り替えながら解く、記憶力チャレンジWebアプリです。難易度と並列数を選び、タイム・手数・マッチ数を見ながら全ボードクリアを目指します。
+
+## Promo Video
 
 https://github.com/user-attachments/assets/27684ad4-7bf1-4b2c-bafe-158800f83e23
 
+## Features
+
+- Easy 3x4、Normal 4x4、Hard Trump の3段階難易度
+- 1から10まで選べる並列ボード数
+- ボードごとの進捗、タイム、手数、マッチ数の表示
+- 同じ配置でのリトライ、新しいシャッフル、次の並列数への挑戦
+- クリア結果のランク表示とX共有
+
+## Promo Source
+
+The promo was authored with HyperFrames in `promo-video/`.
+
+```bash
+cd promo-video
+npm run check
+```
+
+## Development
+
+```bash
+npm install
+npm run dev
+```
+
+## Scripts
+
+```bash
+npm run test
+npm run build
+```
+
+`npm run dev` は Vite 開発サーバーを `127.0.0.1` で起動します。`npm run build` は TypeScript とViteの本番ビルドを実行します。

@@ -1,0 +1,914 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Parallel Memory Promo</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Promo Display";
+        font-style: normal;
+        font-weight: 300 900;
+        src: local("Avenir Next Condensed"), local("Arial");
+      }
+
+      @font-face {
+        font-family: "Promo Mono";
+        font-style: normal;
+        font-weight: 400 900;
+        src: local("Menlo"), local("Monaco");
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #f6f7f4;
+        color: #151922;
+        font-family: "Promo Display", system-ui, sans-serif;
+        font-synthesis: none;
+        text-rendering: geometricPrecision;
+      }
+
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #f6f7f4;
+      }
+
+      .scene {
+        position: absolute;
+        inset: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background:
+          linear-gradient(90deg, rgba(21, 163, 155, 0.1) 0 1px, rgba(246, 247, 244, 0) 1px),
+          linear-gradient(rgba(21, 163, 155, 0.08) 0 1px, rgba(246, 247, 244, 0) 1px),
+          #f6f7f4;
+        background-size: 56px 56px;
+      }
+
+      .scene:not(#scene-1) {
+        opacity: 0;
+      }
+
+      .scene-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        width: 100%;
+        height: 100%;
+        padding: 88px 110px;
+        gap: 64px;
+      }
+
+      .ghost-word {
+        position: absolute;
+        z-index: 0;
+        color: rgba(21, 25, 34, 0.045);
+        font-size: 260px;
+        font-weight: 900;
+        line-height: 0.82;
+        text-transform: uppercase;
+      }
+
+      .ghost-word::before,
+      .brand-mark::before {
+        content: attr(data-label);
+      }
+
+      .edge-rule {
+        position: absolute;
+        z-index: 1;
+        height: 2px;
+        background: #151922;
+        opacity: 0.92;
+      }
+
+      .edge-rule.top {
+        top: 52px;
+        left: 110px;
+        width: 680px;
+      }
+
+      .edge-rule.bottom {
+        right: 110px;
+        bottom: 62px;
+        width: 420px;
+      }
+
+      .eyebrow {
+        color: #0d756f;
+        font-family: "Promo Mono", ui-monospace, monospace;
+        font-size: 24px;
+        font-weight: 800;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        max-width: 780px;
+        margin-top: 24px;
+        color: #151922;
+        font-size: 122px;
+        font-weight: 900;
+        line-height: 0.95;
+      }
+
+      h2 {
+        max-width: 660px;
+        color: #151922;
+        font-size: 92px;
+        font-weight: 900;
+        line-height: 0.98;
+      }
+
+      h1 span,
+      h2 span {
+        color: #0d756f;
+      }
+
+      .lead {
+        max-width: 690px;
+        margin-top: 32px;
+        color: #39404b;
+        font-family: system-ui, sans-serif;
+        font-size: 32px;
+        font-weight: 700;
+        line-height: 1.42;
+      }
+
+      .brand-mark {
+        display: grid;
+        width: 138px;
+        height: 138px;
+        place-items: center;
+        border: 4px solid #151922;
+        background: #151922;
+        color: #ffffff;
+        font-family: "Promo Mono", ui-monospace, monospace;
+        font-size: 38px;
+        font-weight: 900;
+      }
+
+      .scene-hook .scene-content,
+      .scene-outro .scene-content {
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .hook-copy {
+        display: flex;
+        flex: 0 0 790px;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .hook-copy .brand-mark {
+        margin-bottom: 46px;
+      }
+
+      .card-cloud {
+        position: relative;
+        display: grid;
+        flex: 1;
+        height: 820px;
+        min-width: 0;
+        place-items: center;
+      }
+
+      .card-orbit {
+        position: absolute;
+        width: 560px;
+        height: 560px;
+        border: 2px solid rgba(13, 117, 111, 0.35);
+        transform: rotate(11deg);
+      }
+
+      .promo-card {
+        position: absolute;
+        width: 156px;
+        height: 218px;
+        perspective: 900px;
+      }
+
+      .promo-card .inner,
+      .game-card .inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transform-style: preserve-3d;
+      }
+
+      .promo-card .front,
+      .promo-card .back,
+      .game-card .front,
+      .game-card .back {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        border: 1px solid #c9d0c5;
+        border-radius: 12px;
+        backface-visibility: hidden;
+        box-shadow: 0 18px 44px rgba(26, 32, 26, 0.16);
+      }
+
+      .promo-card .back,
+      .game-card .back {
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.18) 25%, rgba(255, 255, 255, 0) 25%) 0 0 / 18px 18px,
+          linear-gradient(225deg, rgba(255, 255, 255, 0.14) 25%, rgba(255, 255, 255, 0) 25%) 0 0 / 18px 18px,
+          #18202a;
+      }
+
+      .promo-card .back::after,
+      .game-card .back::after {
+        content: "";
+        width: 54%;
+        aspect-ratio: 1;
+        border: 3px solid rgba(255, 255, 255, 0.72);
+        transform: rotate(45deg);
+      }
+
+      .promo-card .front,
+      .game-card .front {
+        background: #ffffff;
+        color: #151922;
+        font-family: "Promo Mono", ui-monospace, monospace;
+        font-size: 76px;
+        font-weight: 900;
+        transform: rotateY(180deg);
+      }
+
+      .promo-card.red .front,
+      .game-card.red .front {
+        color: #d53b47;
+      }
+
+      .promo-card.card-a {
+        top: 64px;
+        right: 250px;
+        transform: rotate(-10deg);
+      }
+
+      .promo-card.card-b {
+        top: 190px;
+        right: 94px;
+        transform: rotate(8deg);
+      }
+
+      .promo-card.card-c {
+        top: 370px;
+        right: 330px;
+        transform: rotate(5deg);
+      }
+
+      .promo-card.card-d {
+        top: 510px;
+        right: 138px;
+        transform: rotate(-7deg);
+      }
+
+      .meta-strip {
+        position: absolute;
+        left: 110px;
+        bottom: 72px;
+        display: grid;
+        grid-template-columns: repeat(3, max-content);
+        gap: 10px;
+      }
+
+      .meta-pill,
+      .feature-chip,
+      .stat-chip {
+        border: 1px solid #d8ddd6;
+        background: rgba(255, 255, 255, 0.92);
+        color: #151922;
+        font-family: "Promo Mono", ui-monospace, monospace;
+        font-size: 22px;
+        font-weight: 800;
+      }
+
+      .meta-pill {
+        padding: 14px 18px;
+      }
+
+      .scene-app .scene-content,
+      .scene-gameplay .scene-content,
+      .scene-result .scene-content {
+        display: grid;
+        grid-template-columns: 560px 1fr;
+        align-items: center;
+      }
+
+      .feature-stack {
+        display: grid;
+        gap: 22px;
+        align-content: center;
+      }
+
+      .feature-chip {
+        display: grid;
+        gap: 8px;
+        min-height: 104px;
+        padding: 22px 24px;
+      }
+
+      .feature-chip strong {
+        color: #0d756f;
+        font-size: 28px;
+      }
+
+      .feature-chip span {
+        color: #151922;
+        font-size: 38px;
+        line-height: 1;
+      }
+
+      .browser-frame {
+        min-width: 0;
+        border: 1px solid #bcc4ba;
+        background: #ffffff;
+        box-shadow: 0 36px 90px rgba(21, 25, 34, 0.18);
+        overflow: hidden;
+      }
+
+      .browser-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        height: 44px;
+        padding: 0 18px;
+        border-bottom: 1px solid #d8ddd6;
+        background: #fbfcfa;
+      }
+
+      .browser-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #15a39b;
+      }
+
+      .browser-dot:nth-child(2) {
+        background: #f2c94c;
+      }
+
+      .browser-dot:nth-child(3) {
+        background: #d53b47;
+      }
+
+      .browser-url {
+        margin-left: 14px;
+        color: #69717c;
+        font-family: "Promo Mono", ui-monospace, monospace;
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .shot-wrap {
+        height: 658px;
+        overflow: hidden;
+      }
+
+      .shot-wrap img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top left;
+      }
+
+      .stat-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-top: 22px;
+      }
+
+      .stat-chip {
+        display: grid;
+        gap: 10px;
+        padding: 18px;
+      }
+
+      .stat-chip span {
+        color: #69717c;
+        font-size: 17px;
+        text-transform: uppercase;
+      }
+
+      .stat-chip strong {
+        font-size: 38px;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .game-board-wrap {
+        display: grid;
+        grid-template-columns: 1fr 260px;
+        gap: 26px;
+        align-items: stretch;
+      }
+
+      .game-board {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        border: 1px solid #d8ddd6;
+        background: rgba(255, 255, 255, 0.96);
+        padding: 22px;
+        box-shadow: 0 32px 80px rgba(21, 25, 34, 0.15);
+      }
+
+      .game-card {
+        position: relative;
+        aspect-ratio: 5 / 7;
+        perspective: 900px;
+      }
+
+      .game-card.is-small .front {
+        font-size: 54px;
+      }
+
+      .turn-rail {
+        display: grid;
+        gap: 12px;
+        align-content: start;
+        border: 1px solid #d8ddd6;
+        background: #ffffff;
+        padding: 18px;
+        box-shadow: 0 32px 80px rgba(21, 25, 34, 0.12);
+      }
+
+      .rail-header {
+        display: flex;
+        justify-content: space-between;
+        color: #151922;
+        font-family: "Promo Mono", ui-monospace, monospace;
+        font-size: 22px;
+        font-weight: 900;
+      }
+
+      .rail-item {
+        display: grid;
+        gap: 10px;
+        padding: 14px;
+        border: 1px solid #d8ddd6;
+        background: #fbfcfa;
+      }
+
+      .rail-item.active {
+        border-color: #15a39b;
+      }
+
+      .rail-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-family: "Promo Mono", ui-monospace, monospace;
+        font-size: 18px;
+        font-weight: 900;
+      }
+
+      .rail-title span {
+        display: grid;
+        width: 34px;
+        height: 34px;
+        place-items: center;
+        border: 1px solid #d8ddd6;
+        background: #ffffff;
+      }
+
+      .progress-track {
+        height: 8px;
+        background: #e6eae3;
+        overflow: hidden;
+      }
+
+      .progress-track span {
+        display: block;
+        width: 100%;
+        height: 100%;
+        background: #15a39b;
+        transform: scaleX(0);
+        transform-origin: left center;
+      }
+
+      .game-caption {
+        display: flex;
+        gap: 14px;
+        margin-top: 28px;
+      }
+
+      .game-caption .stat-chip {
+        min-width: 180px;
+      }
+
+      .result-card {
+        display: grid;
+        gap: 22px;
+        width: 560px;
+        border: 2px solid #151922;
+        background: #ffffff;
+        padding: 28px;
+        box-shadow: 0 38px 90px rgba(21, 25, 34, 0.2);
+      }
+
+      .result-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 26px;
+      }
+
+      .rank-badge {
+        display: grid;
+        width: 132px;
+        height: 132px;
+        place-items: center;
+        background: #15a39b;
+        color: #ffffff;
+      }
+
+      .rank-badge span {
+        align-self: end;
+        font-family: "Promo Mono", ui-monospace, monospace;
+        font-size: 18px;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .rank-badge strong {
+        align-self: start;
+        font-family: "Promo Mono", ui-monospace, monospace;
+        font-size: 72px;
+        line-height: 1;
+      }
+
+      .result-card h3 {
+        color: #151922;
+        font-size: 68px;
+        font-weight: 900;
+        line-height: 0.95;
+      }
+
+      .result-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+
+      .result-actions {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+
+      .action-button {
+        display: grid;
+        min-height: 58px;
+        place-items: center;
+        border: 1px solid #bcc4ba;
+        background: #ffffff;
+        color: #151922;
+        font-family: "Promo Mono", ui-monospace, monospace;
+        font-size: 18px;
+        font-weight: 900;
+      }
+
+      .action-button.primary {
+        border-color: #0d756f;
+        background: #15a39b;
+        color: #ffffff;
+      }
+
+      .phone-frame {
+        justify-self: center;
+        width: 410px;
+        height: 790px;
+        border: 10px solid #151922;
+        background: #ffffff;
+        box-shadow: 0 38px 90px rgba(21, 25, 34, 0.2);
+        overflow: hidden;
+      }
+
+      .phone-frame img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top left;
+      }
+
+      .outro-lockup {
+        display: grid;
+        gap: 34px;
+      }
+
+      .outro-lockup h2 {
+        max-width: 880px;
+        font-size: 118px;
+      }
+
+      .cta-line {
+        display: inline-grid;
+        width: max-content;
+        border: 1px solid #0d756f;
+        background: #15a39b;
+        color: #ffffff;
+        padding: 20px 28px;
+        font-family: "Promo Mono", ui-monospace, monospace;
+        font-size: 26px;
+        font-weight: 900;
+      }
+
+      .outro-cards {
+        position: relative;
+        width: 610px;
+        height: 450px;
+      }
+
+      .outro-cards .promo-card:nth-child(1) {
+        left: 0;
+        top: 52px;
+        transform: rotate(-9deg);
+      }
+
+      .outro-cards .promo-card:nth-child(2) {
+        left: 150px;
+        top: 10px;
+        transform: rotate(-2deg);
+      }
+
+      .outro-cards .promo-card:nth-child(3) {
+        left: 300px;
+        top: 52px;
+        transform: rotate(7deg);
+      }
+
+      .outro-cards .promo-card:nth-child(4) {
+        left: 448px;
+        top: 118px;
+        transform: rotate(13deg);
+      }
+
+      .fade-cover {
+        position: absolute;
+        inset: 0;
+        z-index: 20;
+        background: #151922;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .frame-note {
+        position: absolute;
+        right: 110px;
+        top: 62px;
+        color: #69717c;
+        font-family: "Promo Mono", ui-monospace, monospace;
+        font-size: 20px;
+        font-weight: 800;
+      }
+
+      .number {
+        font-variant-numeric: tabular-nums;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="16" data-width="1920" data-height="1080" data-layout-allow-overflow>
+      <div id="scene-1" class="scene scene-hook" data-layout-allow-overflow>
+        <div class="ghost-word" data-label="MEMORY" style="right: -60px; bottom: 52px;" data-layout-ignore></div>
+        <div class="edge-rule top"></div>
+        <div class="edge-rule bottom"></div>
+        <div class="scene-content">
+          <div class="hook-copy">
+            <div class="brand-mark" data-label="PM"></div>
+            <p class="eyebrow">Parallel Memory</p>
+            <h1>神経衰弱を、<span>並列で。</span></h1>
+            <p class="lead">複数の盤面を切り替えながら、記憶力と判断速度をまとめて試すWebゲーム。</p>
+          </div>
+          <div class="card-cloud">
+            <div class="card-orbit"></div>
+            <div class="promo-card card-a red"><div class="inner"><div class="back"></div><div class="front">A♥</div></div></div>
+            <div class="promo-card card-b"><div class="inner"><div class="back"></div><div class="front">K♠</div></div></div>
+            <div class="promo-card card-c red"><div class="inner"><div class="back"></div><div class="front">7♦</div></div></div>
+            <div class="promo-card card-d"><div class="inner"><div class="back"></div><div class="front">Q♣</div></div></div>
+          </div>
+        </div>
+        <div class="meta-strip">
+          <div class="meta-pill">Hard / Trump</div>
+          <div class="meta-pill">3並列</div>
+          <div class="meta-pill number">00:00</div>
+        </div>
+      </div>
+
+      <div id="scene-2" class="scene scene-app" style="opacity: 0;" data-layout-allow-overflow>
+        <div class="ghost-word" data-label="SETUP" style="left: -48px; top: 100px;" data-layout-ignore></div>
+        <div class="frame-note">Easy / Normal / Hard / 1-10 boards</div>
+        <div class="scene-content">
+          <div class="feature-stack">
+            <p class="eyebrow">Web App</p>
+            <h2>難易度と<span>並列数</span>をセット</h2>
+            <div class="feature-chip"><strong>Difficulty</strong><span>3x4 / 4x4 / Trump</span></div>
+            <div class="feature-chip"><strong>Parallel count</strong><span class="number">1 - 10 boards</span></div>
+          </div>
+          <div>
+            <div class="browser-frame">
+              <div class="browser-bar">
+                <span class="browser-dot"></span>
+                <span class="browser-dot"></span>
+                <span class="browser-dot"></span>
+                <span class="browser-url">parallel-memory.local</span>
+              </div>
+              <div class="shot-wrap"><img id="desktop-shot" src="assets/parallel-memory-desktop.png" alt="" /></div>
+            </div>
+            <div class="stat-row">
+              <div class="stat-chip"><span>Time</span><strong class="number">00:00</strong></div>
+              <div class="stat-chip"><span>Moves</span><strong class="number">0</strong></div>
+              <div class="stat-chip"><span>Matches</span><strong class="number">0/78</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="scene-3" class="scene scene-gameplay" style="opacity: 0;" data-layout-allow-overflow>
+        <div class="ghost-word" data-label="PLAY" style="right: -32px; top: 80px;" data-layout-ignore></div>
+        <div class="scene-content">
+          <div class="feature-stack">
+            <p class="eyebrow">Core Loop</p>
+            <h2>盤面をまたいで<span>記憶する</span></h2>
+            <p class="lead">正解なら同じ盤面へ。外すと次の盤面へ。覚える対象が並列に増えていく。</p>
+            <div class="game-caption">
+              <div class="stat-chip"><span>Boards</span><strong class="number">3</strong></div>
+              <div class="stat-chip"><span>Matches</span><strong class="number" id="match-count">0/8</strong></div>
+            </div>
+          </div>
+          <div class="game-board-wrap">
+            <div class="game-board">
+              <div id="g-card-1" class="game-card red"><div class="inner"><div class="back"></div><div class="front">A♥</div></div></div>
+              <div id="g-card-2" class="game-card"><div class="inner"><div class="back"></div><div class="front">8♠</div></div></div>
+              <div id="g-card-3" class="game-card"><div class="inner"><div class="back"></div><div class="front">K♣</div></div></div>
+              <div id="g-card-4" class="game-card red"><div class="inner"><div class="back"></div><div class="front">A♦</div></div></div>
+              <div id="g-card-5" class="game-card"><div class="inner"><div class="back"></div><div class="front">4♠</div></div></div>
+              <div id="g-card-6" class="game-card red"><div class="inner"><div class="back"></div><div class="front">J♥</div></div></div>
+              <div id="g-card-7" class="game-card is-small"><div class="inner"><div class="back"></div><div class="front">10♣</div></div></div>
+              <div id="g-card-8" class="game-card red"><div class="inner"><div class="back"></div><div class="front">J♦</div></div></div>
+              <div id="g-card-9" class="game-card red"><div class="inner"><div class="back"></div><div class="front">5♥</div></div></div>
+              <div id="g-card-10" class="game-card"><div class="inner"><div class="back"></div><div class="front">4♣</div></div></div>
+              <div id="g-card-11" class="game-card red"><div class="inner"><div class="back"></div><div class="front">9♦</div></div></div>
+              <div id="g-card-12" class="game-card"><div class="inner"><div class="back"></div><div class="front">K♠</div></div></div>
+              <div id="g-card-13" class="game-card"><div class="inner"><div class="back"></div><div class="front">2♣</div></div></div>
+              <div id="g-card-14" class="game-card red"><div class="inner"><div class="back"></div><div class="front">5♦</div></div></div>
+              <div id="g-card-15" class="game-card"><div class="inner"><div class="back"></div><div class="front">8♣</div></div></div>
+              <div id="g-card-16" class="game-card red"><div class="inner"><div class="back"></div><div class="front">2♥</div></div></div>
+            </div>
+            <div class="turn-rail">
+              <div class="rail-header"><span>Turn rail</span><strong class="number">1/3</strong></div>
+              <div class="rail-item active" id="rail-1"><div class="rail-title"><span>1</span> Board 1</div><div class="progress-track"><span id="rail-fill-1"></span></div></div>
+              <div class="rail-item" id="rail-2"><div class="rail-title"><span>2</span> Board 2</div><div class="progress-track"><span id="rail-fill-2"></span></div></div>
+              <div class="rail-item" id="rail-3"><div class="rail-title"><span>3</span> Board 3</div><div class="progress-track"><span id="rail-fill-3"></span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="scene-4" class="scene scene-result" style="opacity: 0;" data-layout-allow-overflow data-layout-allow-overlap>
+        <div class="ghost-word" data-label="CLEAR" style="left: -40px; bottom: 74px;" data-layout-ignore></div>
+        <div class="scene-content">
+          <div class="result-card">
+            <div class="result-top">
+              <div><p class="eyebrow">All Clear</p><h3>Result</h3></div>
+              <div class="rank-badge"><span>Rank</span><strong>S</strong></div>
+            </div>
+            <div class="feature-chip"><strong>Hard Trump</strong><span>3並列クリア</span></div>
+            <div class="result-grid">
+              <div class="stat-chip"><span>Time</span><strong class="number">03:42</strong></div>
+              <div class="stat-chip"><span>Moves</span><strong class="number">156</strong></div>
+              <div class="stat-chip"><span>Matches</span><strong class="number">78/78</strong></div>
+            </div>
+            <div class="result-actions">
+              <div class="action-button primary">Share to X</div>
+              <div class="action-button">Next Parallel</div>
+              <div class="action-button">Retry Deck</div>
+              <div class="action-button primary">New Shuffle</div>
+            </div>
+          </div>
+          <div class="phone-frame"><img src="assets/parallel-memory-mobile.png" alt="" /></div>
+        </div>
+      </div>
+
+      <div id="scene-5" class="scene scene-outro" style="opacity: 0;" data-layout-allow-overflow data-layout-allow-overlap>
+        <div class="ghost-word" data-label="NEXT" style="right: -70px; bottom: 44px;" data-layout-ignore></div>
+        <div class="edge-rule top"></div>
+        <div class="edge-rule bottom"></div>
+        <div class="scene-content">
+          <div class="outro-lockup">
+            <div class="brand-mark" data-label="PM"></div>
+            <p class="eyebrow">Parallel Memory</p>
+            <h2>次の<span>並列</span>へ。</h2>
+            <div class="cta-line">Play. Retry. Share. Advance.</div>
+          </div>
+          <div class="outro-cards">
+            <div class="promo-card red"><div class="inner"><div class="back"></div><div class="front">A♥</div></div></div>
+            <div class="promo-card"><div class="inner"><div class="back"></div><div class="front">A♠</div></div></div>
+            <div class="promo-card red"><div class="inner"><div class="back"></div><div class="front">K♦</div></div></div>
+            <div class="promo-card"><div class="inner"><div class="back"></div><div class="front">K♣</div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fade-cover"></div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      function pushScene(oldSelector, newSelector, time) {
+        tl.set(newSelector, { x: 1920, opacity: 1 }, time);
+        tl.to(oldSelector, { x: -1920, duration: 0.5, ease: "power3.inOut" }, time);
+        tl.to(newSelector, { x: 0, duration: 0.5, ease: "power3.inOut" }, time);
+        tl.set(oldSelector, { opacity: 0 }, time + 0.52);
+      }
+
+      function blurScene(oldSelector, newSelector, time) {
+        tl.to(oldSelector, { filter: "blur(10px)", scale: 1.03, opacity: 0, duration: 0.55, ease: "power2.inOut" }, time);
+        tl.fromTo(newSelector, { filter: "blur(10px)", scale: 0.97, opacity: 0 }, { filter: "blur(0px)", scale: 1, opacity: 1, duration: 0.55, ease: "power2.inOut" }, time + 0.1);
+        tl.set(oldSelector, { opacity: 0 }, time + 0.68);
+      }
+
+      tl.from("#scene-1 .brand-mark", { scale: 0.82, opacity: 0, duration: 0.48, ease: "back.out(1.8)" }, 0.22);
+      tl.from("#scene-1 .eyebrow", { x: -42, opacity: 0, duration: 0.38, ease: "power3.out" }, 0.42);
+      tl.from("#scene-1 h1", { y: 64, opacity: 0, duration: 0.58, ease: "expo.out" }, 0.54);
+      tl.from("#scene-1 .lead", { y: 34, opacity: 0, duration: 0.52, ease: "sine.out" }, 0.88);
+      tl.from("#scene-1 .meta-pill", { y: 22, opacity: 0, duration: 0.36, stagger: 0.08, ease: "power2.out" }, 1.1);
+      tl.from("#scene-1 .promo-card", { y: 120, rotation: -14, opacity: 0, duration: 0.62, stagger: 0.09, ease: "back.out(1.5)" }, 0.72);
+      tl.from("#scene-1 .card-orbit", { scale: 0.82, opacity: 0, duration: 0.74, ease: "power1.out" }, 0.82);
+      tl.to("#scene-1 .card-orbit", { rotation: 18, duration: 2.1, ease: "sine.inOut" }, 1.0);
+      tl.to("#scene-1 .promo-card.card-a .inner", { rotationY: 180, duration: 0.48, ease: "power3.inOut" }, 1.55);
+      tl.to("#scene-1 .promo-card.card-c .inner", { rotationY: 180, duration: 0.48, ease: "power3.inOut" }, 1.82);
+      tl.to("#scene-1 .promo-card.card-a .inner", { rotationY: 0, duration: 0.42, ease: "power2.inOut" }, 2.36);
+      tl.to("#scene-1 .promo-card.card-c .inner", { rotationY: 0, duration: 0.42, ease: "power2.inOut" }, 2.48);
+
+      pushScene("#scene-1", "#scene-2", 3.18);
+      tl.from("#scene-2 .eyebrow", { x: -34, opacity: 0, duration: 0.36, ease: "power4.out" }, 3.78);
+      tl.from("#scene-2 h2", { y: 58, opacity: 0, duration: 0.54, ease: "expo.out" }, 3.92);
+      tl.from("#scene-2 .feature-chip", { x: -48, opacity: 0, duration: 0.48, stagger: 0.1, ease: "power3.out" }, 4.18);
+      tl.from("#scene-2 .browser-frame", { x: 88, opacity: 0, scale: 0.96, duration: 0.62, ease: "power2.out" }, 4.0);
+      tl.from("#scene-2 .stat-chip", { y: 26, opacity: 0, duration: 0.36, stagger: 0.08, ease: "back.out(1.6)" }, 4.58);
+      tl.to("#desktop-shot", { scale: 1.035, x: -18, duration: 2.35, ease: "sine.inOut" }, 4.55);
+
+      pushScene("#scene-2", "#scene-3", 6.88);
+      tl.from("#scene-3 .eyebrow", { y: -28, opacity: 0, duration: 0.34, ease: "power4.out" }, 7.42);
+      tl.from("#scene-3 h2", { x: -62, opacity: 0, duration: 0.56, ease: "expo.out" }, 7.56);
+      tl.from("#scene-3 .lead", { y: 32, opacity: 0, duration: 0.48, ease: "sine.out" }, 7.9);
+      tl.from("#scene-3 .game-board", { scale: 0.95, opacity: 0, duration: 0.56, ease: "power3.out" }, 7.54);
+      tl.from("#scene-3 .game-card", { y: 32, opacity: 0, duration: 0.34, stagger: 0.025, ease: "power2.out" }, 7.78);
+      tl.from("#scene-3 .turn-rail", { x: 54, opacity: 0, duration: 0.46, ease: "back.out(1.4)" }, 7.78);
+      tl.to("#g-card-1 .inner", { rotationY: 180, duration: 0.34, ease: "power3.inOut" }, 8.48);
+      tl.to("#g-card-4 .inner", { rotationY: 180, duration: 0.34, ease: "power3.inOut" }, 8.68);
+      tl.to("#rail-fill-1", { scaleX: 0.5, duration: 0.38, ease: "power2.out" }, 8.86);
+      tl.set("#match-count", { innerText: "1/8" }, 9.02);
+      tl.to("#g-card-6 .inner", { rotationY: 180, duration: 0.34, ease: "power3.inOut" }, 9.34);
+      tl.to("#g-card-8 .inner", { rotationY: 180, duration: 0.34, ease: "power3.inOut" }, 9.54);
+      tl.to("#rail-fill-1", { scaleX: 1, duration: 0.4, ease: "power2.out" }, 9.76);
+      tl.set("#match-count", { innerText: "2/8" }, 9.92);
+      tl.to("#rail-1", { borderColor: "#d8ddd6", backgroundColor: "#fbfcfa", duration: 0.24, ease: "sine.inOut" }, 10.0);
+      tl.to("#rail-2", { borderColor: "#15a39b", backgroundColor: "#ffffff", duration: 0.24, ease: "sine.inOut" }, 10.0);
+      tl.to("#rail-fill-2", { scaleX: 0.34, duration: 0.42, ease: "power2.out" }, 10.1);
+
+      pushScene("#scene-3", "#scene-4", 10.58);
+      tl.from("#scene-4 .result-card", { y: 54, opacity: 0, scale: 0.96, duration: 0.58, ease: "back.out(1.25)" }, 11.14);
+      tl.from("#scene-4 .rank-badge", { scale: 0.72, opacity: 0, duration: 0.42, ease: "back.out(2)" }, 11.34);
+      tl.from("#scene-4 .feature-chip", { x: -38, opacity: 0, duration: 0.42, ease: "power3.out" }, 11.54);
+      tl.from("#scene-4 .result-grid .stat-chip", { y: 24, opacity: 0, duration: 0.34, stagger: 0.07, ease: "power2.out" }, 11.74);
+      tl.from("#scene-4 .action-button", { scale: 0.94, opacity: 0, duration: 0.3, stagger: 0.06, ease: "sine.out" }, 12.04);
+      tl.from("#scene-4 .phone-frame", { x: 94, rotation: 2, opacity: 0, duration: 0.6, ease: "power3.out" }, 11.3);
+
+      blurScene("#scene-4", "#scene-5", 13.68);
+      tl.from("#scene-5 .brand-mark", { scale: 0.82, opacity: 0, duration: 0.44, ease: "back.out(1.8)" }, 14.32);
+      tl.from("#scene-5 .eyebrow", { x: -36, opacity: 0, duration: 0.34, ease: "power3.out" }, 14.48);
+      tl.from("#scene-5 h2", { y: 58, opacity: 0, duration: 0.54, ease: "expo.out" }, 14.58);
+      tl.from("#scene-5 .cta-line", { y: 24, opacity: 0, duration: 0.38, ease: "power2.out" }, 14.92);
+      tl.from("#scene-5 .promo-card", { y: 70, opacity: 0, rotation: -8, duration: 0.5, stagger: 0.08, ease: "back.out(1.4)" }, 14.52);
+      tl.to("#scene-5 .promo-card:nth-child(1) .inner", { rotationY: 180, duration: 0.32, ease: "power3.inOut" }, 15.08);
+      tl.to("#scene-5 .promo-card:nth-child(2) .inner", { rotationY: 180, duration: 0.32, ease: "power3.inOut" }, 15.18);
+      tl.to(".fade-cover", { opacity: 1, duration: 0.42, ease: "power2.in" }, 15.58);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
