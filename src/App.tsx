@@ -531,8 +531,10 @@ function BoardProgress({
 }) {
   const percent = Math.round(getBoardCompletion(board) * 100);
   const pendingCount = board.pendingId ? 1 : 0;
+  const miniGridMaxWidth = board.columns * 10 + (board.columns - 1) * 2;
   const miniGridStyle = {
-    "--mini-columns": board.columns
+    "--mini-columns": board.columns,
+    "--mini-grid-max-width": `${miniGridMaxWidth}px`
   } as CSSProperties;
   const revealedSet = useMemo(
     () =>

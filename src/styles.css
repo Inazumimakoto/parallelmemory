@@ -519,6 +519,8 @@ h2 {
 .board-progress {
   display: grid;
   gap: 8px;
+  min-width: 0;
+  overflow: hidden;
   padding: 10px;
   border: 1px solid var(--border);
   background: #fbfcfa;
@@ -554,12 +556,16 @@ h2 {
 
 .mini-grid {
   display: grid;
-  grid-template-columns: repeat(var(--mini-columns), 10px);
+  grid-template-columns: repeat(var(--mini-columns), minmax(0, 1fr));
   gap: 2px;
-  justify-content: start;
+  justify-content: center;
+  justify-self: center;
+  width: 100%;
+  max-width: var(--mini-grid-max-width);
 }
 
 .mini-grid span {
+  min-width: 0;
   aspect-ratio: 5 / 7;
   border: 1px solid #cbd2c8;
   background: #e8ece6;
@@ -583,6 +589,7 @@ h2 {
 
 .board-progress-meta {
   display: flex;
+  gap: 8px;
   justify-content: space-between;
   color: var(--muted);
   font-size: 11px;
