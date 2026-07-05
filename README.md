@@ -8,7 +8,7 @@ https://parallelmemory.inazu.me/
 
 ## Promo Video
 
-[![Parallel Memory promo](media/parallel-memory-promo.webp)](https://github.com/user-attachments/assets/27684ad4-7bf1-4b2c-bafe-158800f83e23)
+![Parallel Memory promo](media/parallel-memory-promo.webp)
 
 ## Features
 
