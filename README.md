@@ -14,7 +14,7 @@ https://parallelmemory.inazu.me/
 
 ### Gameplay
 
-![Parallel Memory gameplay](media/parallel-memory-gameplay.gif)
+![Parallel Memory gameplay](media/parallel-memory-gameplay-2x.gif)
 
 ## Features
 
