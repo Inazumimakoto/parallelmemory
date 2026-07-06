@@ -6,9 +6,15 @@
 
 https://parallelmemory.inazu.me/
 
-## Promo Video
+## Demo
+
+### Promo
 
 ![Parallel Memory promo](media/parallel-memory-promo.webp)
+
+### Gameplay
+
+![Parallel Memory gameplay](media/parallel-memory-gameplay.gif)
 
 ## Features
 
